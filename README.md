@@ -5,7 +5,7 @@ stock-in / stock-out movements with a full ledger, low-stock alerts, and a dashb
 Backed end-to-end by automated tests and shipped as a Docker Compose stack that runs with
 a single command.
 
-![CI](https://github.com/peem/inventory-manager/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/peemphetpimolzzz/inventory-manager/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 <!-- Add a screen recording of the dashboard + a stock movement here. -->
@@ -39,7 +39,7 @@ a single command.
 > Prerequisites: **Docker and git only.** No .NET, Node, or SQL Server installation needed.
 
 ```bash
-git clone https://github.com/peem/inventory-manager.git
+git clone https://github.com/peemphetpimolzzz/inventory-manager.git
 cd inventory-manager
 cp .env.example .env
 docker compose up --build
@@ -98,6 +98,12 @@ inventory-manager/
 Copy `.env.example` to `.env`. The SQL Server `SA_PASSWORD` must meet the complexity policy
 (≥ 8 characters with upper, lower, digit, and symbol). Host ports for the web app, API, and
 database are configurable there.
+
+## Screenshots
+
+| Dashboard | Products | Mobile |
+|-----------|----------|--------|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Products](docs/screenshots/products.png) | ![Mobile](docs/screenshots/mobile.png) |
 
 ## License
 
