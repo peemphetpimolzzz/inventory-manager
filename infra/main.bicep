@@ -35,7 +35,7 @@ param sqlAdminLogin string = 'sqladmin'
 @secure()
 param sqlAdminPassword string
 
-@description('Object ID of the deploying user/service principal, granted Key Vault Secrets Officer so the connection-string secret can be written.')
+@description('Object ID of the signed-in user running this deployment (az ad signed-in-user show --query id), granted Key Vault Secrets Officer so the connection-string secret can be written. The provisioning deploy is run by a person; the OIDC service principal only runs the image rollout, not this template.')
 param deployerObjectId string
 
 var suffix = uniqueString(resourceGroup().id, appName)
