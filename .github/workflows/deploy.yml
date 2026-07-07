@@ -1,0 +1,71 @@
+name: Deploy (Azure)
+
+# Builds the API image, pushes it to Azure Container Registry, and rolls it out
+# to the Azure Container App. Authentication uses OIDC federated credentials —
+# there are no long-lived cloud secrets stored in the repository.
+#
+# Required repository configuration (see docs/deployment.md):
+#   Secrets:   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
+#   Variables: AZURE_RESOURCE_GROUP, ACR_NAME, API_APP_NAME
+
+on:
+  # Manual only for now — no Azure resources or OIDC secrets are provisioned
+  # yet, so an automatic deploy would fail. Once the infrastructure and the
+  # repository secrets from docs/deployment.md are in place, re-enable the push
+  # trigger below to deploy on every merge to main.
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'backend/**'
+  #     - '.github/workflows/deploy.yml'
+
+concurrency:
+  # Queue overlapping deploys instead of cancelling — a cancel mid-rollout could
+  # leave a half-applied revision.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push image to ACR
+        run: |
+          IMAGE_TAG="${GITHUB_SHA::7}"
+          az acr build \
+            --registry "${{ vars.ACR_NAME }}" \
+            --image "inventory-api:${IMAGE_TAG}" \
+            --image "inventory-api:latest" \
+            --file backend/src/InventoryManager.Api/Dockerfile \
+            .
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> "$GITHUB_ENV"
+
+      - name: Deploy new revision to Container Apps
+        run: |
+          ACR_LOGIN_SERVER="$(az acr show --name "${{ vars.ACR_NAME }}" --query loginServer -o tsv)"
+          az containerapp update \
+            --name "${{ vars.API_APP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --image "${ACR_LOGIN_SERVER}/inventory-api:${IMAGE_TAG}"
+
+      - name: Show app URL
+        run: |
+          az containerapp show \
+            --name "${{ vars.API_APP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --query "properties.configuration.ingress.fqdn" -o tsv
