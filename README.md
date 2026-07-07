@@ -32,7 +32,8 @@ a single command.
 | Frontend | React 18, TypeScript, Vite |
 | Web server | nginx (serves the SPA and reverse-proxies the API) |
 | Tests | xUnit (unit + integration), Playwright (end-to-end) |
-| Infrastructure | Docker Compose |
+| Infrastructure | Docker Compose (local), Bicep + Azure Container Apps (cloud) |
+| Cloud | Azure Container Apps, Azure SQL Database, ACR, Key Vault (OIDC CI/CD) |
 
 ## Quick start
 
@@ -61,6 +62,18 @@ browser ─▶ web (nginx)  ──/api──▶  api (ASP.NET Core)  ──▶  
 
 nginx serves the built React app and reverse-proxies `/api` to the API container, so the
 browser only ever talks to one origin — no CORS configuration is required in production.
+
+## Deploy to Azure
+
+The same container runs in the cloud on **Azure Container Apps**, backed by an **Azure SQL
+Database**. Infrastructure is defined as Bicep in [`infra/`](infra/), and the
+[`Deploy (Azure)`](.github/workflows/deploy.yml) workflow builds the image in ACR and rolls
+out a new revision — authenticating with **OIDC federated credentials**, so no long-lived
+cloud secret is stored in the repo. The database connection string is kept in **Key Vault**
+and injected as a referenced secret.
+
+See [`docs/deployment.md`](docs/deployment.md) for the full walkthrough (provisioning, OIDC
+setup, and teardown).
 
 ## Running the tests
 
