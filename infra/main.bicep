@@ -22,6 +22,10 @@ param appName string = 'inventorymgr'
 param location string = resourceGroup().location
 
 @description('Container image reference for the API, e.g. <acr>.azurecr.io/inventory-api:<tag>. Leave as the placeholder for the first infra-only deploy; the deploy workflow updates it on each release.')
+// Bootstrap note: the placeholder image listens on :80, while ingress and the
+// probes below target 8080, so the first (infra-only) revision stays unhealthy
+// until the deploy workflow pushes the real image. That is expected — the app
+// only serves once its own image is deployed.
 param apiImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
 @description('Azure SQL administrator login.')
@@ -127,6 +131,13 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01' = {
 }
 
 // Allow other Azure services (Container Apps) to reach the server.
+//
+// Known limitation (demo simplicity): this is the "Allow Azure services"
+// catch-all, so the server is reachable from any Azure tenant — the SQL admin
+// password is the only barrier. A production deployment would instead put the
+// Container Apps environment on a VNet, expose SQL through a Private Endpoint +
+// private DNS zone, drop this rule, and set publicNetworkAccess: 'Disabled'.
+// See docs/deployment.md → "Known limitations".
 resource sqlAllowAzure 'Microsoft.Sql/servers/firewallRules@2023-08-01' = {
   parent: sqlServer
   name: 'AllowAllAzureIps'
@@ -264,9 +275,14 @@ resource apiApp 'Microsoft.App/containerApps@2024-03-01' = {
           ]
         }
       ]
+      // Pinned to a single replica: the app applies EF migrations on startup
+      // (MigrateAsync before app.Run), so multiple replicas would run DDL
+      // concurrently against Azure SQL with no distributed lock. To scale
+      // horizontally, set RUN_MIGRATIONS=false on the API and apply migrations
+      // as a separate release step, then raise maxReplicas.
       scale: {
         minReplicas: 1
-        maxReplicas: 3
+        maxReplicas: 1
       }
     }
   }
