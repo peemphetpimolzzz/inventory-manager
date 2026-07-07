@@ -118,6 +118,22 @@ fully functional on its own via Swagger.
   soft-delete is on, so after `az group delete` you must purge the vault before
   re-deploying within the retention window: `az keyvault purge --name <kvName>`.
 
+## Known limitations
+
+This is a portfolio template optimised for a one-command deploy, so a few production
+concerns are deliberately traded for simplicity:
+
+- **Azure SQL is on the public endpoint** with the "Allow Azure services" firewall rule, so
+  the admin password is the only network barrier. In production, put the Container Apps
+  environment on a VNet, reach SQL through a **Private Endpoint** + private DNS zone, drop
+  the `AllowAllAzureIps` rule, and set `publicNetworkAccess: 'Disabled'`.
+- **The API applies EF migrations on startup**, which is why it is pinned to a single
+  replica (concurrent replicas would race the DDL). To scale horizontally, set
+  `RUN_MIGRATIONS=false` on the API and run migrations as a separate release step.
+- **First revision is unhealthy until the real image is pushed** — the placeholder image
+  listens on `:80` while the probes target `:8080`. This is expected; the deploy workflow
+  replaces the image and the app becomes healthy on the next revision.
+
 ## Teardown
 
 ```bash
