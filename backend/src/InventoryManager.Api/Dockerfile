@@ -8,7 +8,7 @@ COPY Directory.Build.props Directory.Packages.props ./
 COPY backend/src/InventoryManager.Api/InventoryManager.Api.csproj backend/src/InventoryManager.Api/
 RUN dotnet restore backend/src/InventoryManager.Api/InventoryManager.Api.csproj
 
-COPY backend/ backend/
+COPY backend/src/ backend/src/
 RUN dotnet publish backend/src/InventoryManager.Api/InventoryManager.Api.csproj \
     -c Release -o /app/publish /p:UseAppHost=false
 

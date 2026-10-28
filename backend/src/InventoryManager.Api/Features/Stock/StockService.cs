@@ -1,3 +1,4 @@
+using System.Data;
 using InventoryManager.Api.Common;
 using InventoryManager.Api.Data;
 using InventoryManager.Api.Domain;
@@ -13,7 +14,7 @@ public class StockService(InventoryDbContext db)
     /// </summary>
     public async Task<Product> ApplyMovementAsync(int productId, TransactionType type, int quantity, string? note)
     {
-        await using var tx = await db.Database.BeginTransactionAsync();
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
         var product = await db.Products.FirstOrDefaultAsync(p => p.Id == productId)
             ?? throw new NotFoundException($"Product {productId} not found.");

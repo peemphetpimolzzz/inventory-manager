@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManager.Api.Common;
 
@@ -22,6 +23,11 @@ public class ApiExceptionMiddleware(RequestDelegate next, ILogger<ApiExceptionMi
         catch (BusinessRuleException ex)
         {
             await WriteProblem(context, StatusCodes.Status409Conflict, "Business Rule Violation", ex.Message);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await WriteProblem(context, StatusCodes.Status409Conflict, "Concurrency Conflict",
+                "The record was modified by another request. Please retry.");
         }
         catch (Exception ex)
         {

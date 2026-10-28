@@ -5,10 +5,9 @@ stock-in / stock-out movements with a full ledger, low-stock alerts, and a dashb
 Backed end-to-end by automated tests and shipped as a Docker Compose stack that runs with
 a single command.
 
-![CI](https://github.com/peemphetpimolzzz/inventory-manager/actions/workflows/ci.yml/badge.svg)
-![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+[![CI](https://github.com/peemphetpimolzzz/inventory-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/peemphetpimolzzz/inventory-manager/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-<!-- Add a screen recording of the dashboard + a stock movement here. -->
 ![Demo](docs/screenshots/demo.gif)
 
 ## Features
@@ -101,9 +100,11 @@ inventory-manager/
 │   └── tests/                         # xUnit unit + integration tests
 ├── frontend/                          # React + TypeScript + Vite, served by nginx
 ├── e2e/                               # Playwright end-to-end tests
+├── infra/                             # Azure Bicep IaC (Container Apps, Azure SQL, ACR, Key Vault)
+├── docs/deployment.md                 # Cloud provisioning & OIDC CI/CD walkthrough
 ├── docker-compose.yml                 # db + api + web
 ├── docker-compose.test.yml            # test database + test runners
-└── .github/workflows/ci.yml           # unit, integration, frontend build, e2e
+└── .github/workflows/                 # CI (unit, integration, e2e) + Azure OIDC deploy
 ```
 
 ## Configuration
@@ -120,4 +121,4 @@ database are configurable there.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) — Part of [Peem Phetpimol's portfolio](https://peemphetpimolzzz.github.io) (Fullstack & Cloud Engineer · Test Automation).

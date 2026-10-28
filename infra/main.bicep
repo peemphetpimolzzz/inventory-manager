@@ -167,9 +167,8 @@ resource connSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: connSecretName
   properties: {
     // Password is single-quoted so a ';' in it does not terminate the token
-    // (ADO.NET connection-string quoting). Avoid a literal single quote in the
-    // password, or double it per the connection-string spec.
-    value: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${databaseName};User ID=${sqlAdminLogin};Password=\'${sqlAdminPassword}\';Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+    // (ADO.NET connection-string quoting), and any embedded single quote is doubled.
+    value: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${databaseName};User ID=${sqlAdminLogin};Password=\'${replace(sqlAdminPassword, '\'', '\'\'')}\';Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
   }
   dependsOn: [
     kvSecretsOfficer
