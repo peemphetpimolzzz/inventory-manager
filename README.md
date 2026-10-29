@@ -27,8 +27,8 @@ a single command.
 
 | Layer | Technology |
 |-------|------------|
-| Backend | ASP.NET Core (.NET 10), EF Core, SQL Server |
-| Frontend | React 18, TypeScript, Vite |
+| Backend | ASP.NET Core (.NET), EF Core, SQL Server |
+| Frontend | React, TypeScript, Vite |
 | Web server | nginx (serves the SPA and reverse-proxies the API) |
 | Tests | xUnit (unit + integration), Playwright (end-to-end) |
 | Infrastructure | Docker Compose (local), Bicep + Azure Container Apps (cloud) |
