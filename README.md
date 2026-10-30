@@ -1,35 +1,32 @@
-# Inventory Manager
+# StockFlow — Smart Inventory, Stock Ledger & Purchase Order System
 
-A fullstack inventory and stock-control application — tracked products and categories,
-stock-in / stock-out movements with a full ledger, low-stock alerts, and a dashboard.
-Backed end-to-end by automated tests and shipped as a Docker Compose stack that runs with
-a single command.
+A commercial-grade fullstack inventory and stock-control platform — tracked SKUs and categories,
+atomic stock-in / stock-out movements with an immutable audit ledger, low-stock replenishment
+alerts, and an executive KPI dashboard. Built with a clean Minimal + Modern (Shadcn / Vercel Geist)
+interface, backed end-to-end by automated tests, and shipped as a single-command Docker Compose
+stack or Azure Container Apps deployment.
 
 [![CI](https://github.com/peemphetpimolzzz/inventory-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/peemphetpimolzzz/inventory-manager/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-![Demo](docs/screenshots/demo.gif)
+![StockFlow Dashboard](docs/screenshots/dashboard.png)
 
-## Features
+## Highlights for Operations & SME Teams
 
-- **Products & categories** — full CRUD with SKU uniqueness and server-side validation.
-- **Stock movements** — stock-in / stock-out recorded as an immutable ledger; the product
-  quantity and the ledger entry are written in a single database transaction, and a
-  stock-out that would drive quantity below zero is rejected.
-- **Low-stock alerts** — anything at or below its reorder level is flagged in the list and
-  counted on the dashboard.
-- **Dashboard** — total products, total stock value, low-stock count, and recent activity.
-- **Self-documenting API** — Swagger UI generated from the controllers.
-- **Seeded demo data** — the app is populated on first run, so there is something to see
-  immediately.
+- **SKU & Category Catalog** — full CRUD with SKU uniqueness, unit price valuation, reorder thresholds, and server-side validation.
+- **Immutable ACID Stock Ledger** — every stock-in / stock-out movement is recorded as an immutable ledger row; the product quantity and ledger entry are committed in a single SQL Server transaction, and any stock-out that would drive quantity below zero is rejected.
+- **Low-Stock & Replenishment Alerts** — SKUs at or below their reorder level are flagged with visual stock health indicators and counted on the executive dashboard.
+- **Minimal + Modern UI** — responsive Shadcn / Vercel Geist interface with tabular numerals, visual stock health bars, quick search (`⌘K` style), Light/Dark mode, and EN/TH bilingual support.
+- **Self-Documenting OpenAPI** — Swagger UI generated directly from the ASP.NET Core controllers.
+- **Turnkey Seeded Data** — populated on first startup so buyers and reviewers can evaluate workflows immediately.
 
 ## Tech stack
 
 | Layer | Technology |
 |-------|------------|
 | Backend | ASP.NET Core (.NET), EF Core, SQL Server |
-| Frontend | React, TypeScript, Vite |
-| Web server | nginx (serves the SPA and reverse-proxies the API) |
+| Frontend | React, TypeScript, Vite (Shadcn / Vercel Geist Design System) |
+| Web server | nginx (serves the SPA and reverse-proxies `/api`) |
 | Tests | xUnit (unit + integration), Playwright (end-to-end) |
 | Infrastructure | Docker Compose (local), Bicep + Azure Container Apps (cloud) |
 | Cloud | Azure Container Apps, Azure SQL Database, ACR, Key Vault (OIDC CI/CD) |
@@ -106,18 +103,6 @@ inventory-manager/
 ├── docker-compose.test.yml            # test database + test runners
 └── .github/workflows/                 # CI (unit, integration, e2e) + Azure OIDC deploy
 ```
-
-## Configuration
-
-Copy `.env.example` to `.env`. The SQL Server `SA_PASSWORD` must meet the complexity policy
-(≥ 8 characters with upper, lower, digit, and symbol). Host ports for the web app, API, and
-database are configurable there.
-
-## Screenshots
-
-| Dashboard | Products | Mobile |
-|-----------|----------|--------|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Products](docs/screenshots/products.png) | ![Mobile](docs/screenshots/mobile.png) |
 
 ## License
 

@@ -12,7 +12,10 @@ export function Categories() {
   const [description, setDescription] = useState('');
 
   const load = () =>
-    api.get<Category[]>('/categories').then(setItems).catch((e) => setError((e as Error).message));
+    api
+      .get<Category[]>('/categories')
+      .then(setItems)
+      .catch((e) => setError((e as Error).message));
 
   useEffect(() => {
     void load();
@@ -64,7 +67,12 @@ export function Categories() {
   return (
     <div>
       <div className="page-header">
-        <h1>Categories</h1>
+        <div>
+          <h1>Categories</h1>
+          <div className="page-subtitle">
+            Organize SKUs into structured product groups for reporting and stock control
+          </div>
+        </div>
         <button className="button primary" onClick={openCreate}>
           + New category
         </button>
@@ -76,22 +84,24 @@ export function Categories() {
         </div>
       )}
 
-      <div className="card">
+      <div className="card card-flush">
         <table className="data-table">
           <thead>
             <tr>
               <th>Name</th>
               <th>Description</th>
               <th className="num">Products</th>
-              <th />
+              <th style={{ textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {items.map((category) => (
               <tr key={category.id}>
-                <td>{category.name}</td>
-                <td>{category.description}</td>
-                <td className="num">{category.productCount}</td>
+                <td style={{ fontWeight: 600 }}>{category.name}</td>
+                <td style={{ color: 'var(--text-secondary)' }}>{category.description || '—'}</td>
+                <td className="num">
+                  <span className="badge badge-neutral tabular">{category.productCount}</span>
+                </td>
                 <td className="actions">
                   <button className="link-button" onClick={() => openEdit(category)}>
                     Edit
@@ -114,11 +124,19 @@ export function Categories() {
       </div>
 
       {showForm && (
-        <Modal title={editing ? 'Edit category' : 'New category'} onClose={() => setShowForm(false)}>
+        <Modal
+          title={editing ? 'Edit category' : 'New category'}
+          onClose={() => setShowForm(false)}
+        >
           <form className="form" onSubmit={submit}>
             <label>
               Name
-              <input className="input" required value={name} onChange={(e) => setName(e.target.value)} />
+              <input
+                className="input"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </label>
             <label>
               Description

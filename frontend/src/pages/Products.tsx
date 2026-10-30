@@ -57,7 +57,10 @@ export function Products() {
   }, [load]);
 
   useEffect(() => {
-    api.get<Category[]>('/categories').then(setCategories).catch(() => undefined);
+    api
+      .get<Category[]>('/categories')
+      .then(setCategories)
+      .catch(() => undefined);
   }, []);
 
   const openCreate = () => {
@@ -129,7 +132,12 @@ export function Products() {
   return (
     <div>
       <div className="page-header">
-        <h1>Products</h1>
+        <div>
+          <h1>Products</h1>
+          <div className="page-subtitle">
+            Manage SKUs, unit pricing, reorder thresholds, and atomic stock-in / stock-out movements
+          </div>
+        </div>
         <button className="button primary" onClick={openCreate}>
           + New product
         </button>
@@ -142,20 +150,29 @@ export function Products() {
       )}
 
       <div className="toolbar">
-        <input
-          className="input"
-          style={{ maxWidth: 280 }}
-          placeholder="Search name or SKU…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <label className="checkbox">
-          <input type="checkbox" checked={lowOnly} onChange={(e) => setLowOnly(e.target.checked)} />
-          Low stock only
-        </label>
+        <div className="toolbar-group">
+          <input
+            className="input"
+            style={{ width: 280 }}
+            placeholder="Search name or SKU…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={lowOnly}
+              onChange={(e) => setLowOnly(e.target.checked)}
+            />
+            Low stock only
+          </label>
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--muted)' }} className="tabular">
+          {page ? `${page.items.length} SKU(s) shown` : 'Loading…'}
+        </span>
       </div>
 
-      <div className="card">
+      <div className="card card-flush">
         <table className="data-table">
           <thead>
             <tr>
@@ -165,36 +182,67 @@ export function Products() {
               <th className="num">Price</th>
               <th className="num">On hand</th>
               <th>Status</th>
-              <th />
+              <th style={{ textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {page?.items.map((product) => (
-              <tr key={product.id}>
-                <td className="mono">{product.sku}</td>
-                <td>{product.name}</td>
-                <td>{product.categoryName}</td>
-                <td className="num">{formatCurrency(product.unitPrice)}</td>
-                <td className="num">{product.quantityOnHand}</td>
-                <td>
-                  {product.isLowStock ? <Badge tone="low">Low</Badge> : <Badge tone="ok">OK</Badge>}
-                </td>
-                <td className="actions">
-                  <button className="link-button" onClick={() => setMovement({ product, type: 'in' })}>
-                    In
-                  </button>
-                  <button className="link-button" onClick={() => setMovement({ product, type: 'out' })}>
-                    Out
-                  </button>
-                  <button className="link-button" onClick={() => openEdit(product)}>
-                    Edit
-                  </button>
-                  <button className="link-button danger" onClick={() => remove(product)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {page?.items.map((product) => {
+              const target = Math.max(product.reorderLevel * 2, 10);
+              const pct = Math.min(100, Math.max(8, Math.round((product.quantityOnHand / target) * 100)));
+              return (
+                <tr key={product.id}>
+                  <td className="mono">{product.sku}</td>
+                  <td style={{ fontWeight: 600 }}>{product.name}</td>
+                  <td>
+                    <span className="badge badge-neutral">{product.categoryName}</span>
+                  </td>
+                  <td className="num">{formatCurrency(product.unitPrice)}</td>
+                  <td className="num">
+                    <div className="stock-cell">
+                      <span>
+                        <strong>{product.quantityOnHand}</strong>{' '}
+                        <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                          / min {product.reorderLevel}
+                        </span>
+                      </span>
+                      <div className="stock-track">
+                        <div
+                          className={`stock-fill ${product.isLowStock ? 'low' : 'ok'}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {product.isLowStock ? (
+                      <Badge tone="low">Low</Badge>
+                    ) : (
+                      <Badge tone="ok">OK</Badge>
+                    )}
+                  </td>
+                  <td className="actions">
+                    <button
+                      className="link-button"
+                      onClick={() => setMovement({ product, type: 'in' })}
+                    >
+                      In
+                    </button>
+                    <button
+                      className="link-button"
+                      onClick={() => setMovement({ product, type: 'out' })}
+                    >
+                      Out
+                    </button>
+                    <button className="link-button" onClick={() => openEdit(product)}>
+                      Edit
+                    </button>
+                    <button className="link-button danger" onClick={() => remove(product)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
             {page && page.items.length === 0 && (
               <tr>
                 <td colSpan={7} className="empty">
@@ -321,8 +369,9 @@ function MovementModal({
           onSubmit(quantity, note);
         }}
       >
-        <p>
-          On hand: <strong>{product.quantityOnHand}</strong>
+        <p style={{ margin: 0, fontSize: 13.5 }}>
+          On hand: <strong>{product.quantityOnHand}</strong> · Reorder level:{' '}
+          <strong>{product.reorderLevel}</strong>
         </p>
         <label>
           Quantity
